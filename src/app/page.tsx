@@ -1,29 +1,19 @@
-import { SparklesText } from "@/components/magicui/sparkles-text";
-import Link from "next/link";
-import { ModeToggle } from "@/components/ModeToggle";
-import { DotPattern } from "@/components/magicui/dot-pattern";
 import LoginButton from "@/components/LoginButton";
-
-
-
-
-const texts = [
-  "Yunnet",
-  "Homework"
-];
+import { SparklesText } from "@/components/magicui/sparkles-text";
 
 export default function Home() {
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 overflow-hidden">
-      <DotPattern className="absolute inset-0 opacity-50"></DotPattern>
-      <SparklesText text="Yunnet Homework" />
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8">
+      
+      <div className="flex flex-col items-center gap-4">
+        <SparklesText text="Next.js + Express" />
+        <SparklesText text="Login Template" />
+      </div>
 
       <LoginButton />
-
-      <ModeToggle />
-
-    </main>
+      
+    </div>
 
   );
 }
