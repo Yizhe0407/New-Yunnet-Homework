@@ -1,7 +1,19 @@
 // src/data/users.ts
-import { User } from '../models/user';
+import { PrismaClient } from '../../prisma/generated/client'
 
-export let users: User[] = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', createdAt: new Date() },
-  { id: 2, name: 'Bobji', email: 'bob@example.com', createdAt: new Date() },
-];
+const prisma = new PrismaClient();
+
+export const findUser = async (email: string) => {
+  return await prisma.user.findUnique({
+    where: { email },
+  });
+};
+
+export const createUser = async (email: string, password: string) => {
+  return await prisma.user.create({
+    data: {
+      email,
+      password,
+    },
+  });
+};

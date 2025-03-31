@@ -1,13 +1,18 @@
 // src/app.ts
-import express, { Application } from 'express';
+import express from 'express';
 import userRoutes from './routes/userRoutes';
+import dotenv from 'dotenv';
 
-const app: Application = express();
+dotenv.config();
 
-app.use(express.json()); // 解析 JSON 請求主體
-app.use('/api', userRoutes); // 將路由掛載到 /api 路徑下
+const app = express();
 
-const PORT = 3000;
+app.use(express.json());
+
+// 掛載路由
+app.use('/api/auth', userRoutes);
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`伺服器運行於 http://localhost:${PORT}`);
 });
