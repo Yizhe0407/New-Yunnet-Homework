@@ -17,7 +17,7 @@ type LoginSchema = z.infer<typeof loginSchema>; // 使用 PascalCase
 export const api = {
     register: async (data: UserSchema) => {
         userSchema.parse(data); // 驗證資料
-        const response = await fetch("api/auth/register", {
+        const response = await fetch("/api/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
