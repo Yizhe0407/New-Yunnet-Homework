@@ -60,9 +60,10 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  /* Light mode: 淺灰色 #b5b6ba */
+  --background: oklch(0.95 0 0); /* 接近 #E5E7EB 的淺灰色 */
+  --foreground: oklch(0.145 0 0); /* 深色文字保持不變 */
+  --card: oklch(0.98 0 0); /* 卡片稍亮一點 */
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -99,9 +100,10 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  /* Dark mode: 恢復原本的深色背景 */
+  --background: oklch(0.145 0 0); /* 原來的深色背景 */
+  --foreground: oklch(0.985 0 0); /* 淺色文字保持不變 */
+  --card: oklch(0.205 0 0); /* 卡片恢復原色 */
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
