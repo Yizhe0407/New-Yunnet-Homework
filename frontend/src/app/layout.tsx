@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import { ModeToggle } from "@/components/ModeToggle";
+import toast, { Toaster } from 'react-hot-toast';
 
 
 const geistSans = Geist({
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className="relative overflow-hidden">
+        <div><Toaster /></div>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

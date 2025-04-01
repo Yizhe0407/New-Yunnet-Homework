@@ -8,7 +8,7 @@ import {
 export default function Terminalnterface() {
     return (
         <Terminal>
-            <TypingAnimation>&gt; pnpm dlx shadcn@latest init</TypingAnimation>
+            <TypingAnimation>&gt; yarn dlx shadcn@latest init</TypingAnimation>
 
             <AnimatedSpan delay={1500} className="text-green-500">
                 <span>✔ Frontend: Next.js</span>

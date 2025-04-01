@@ -6,13 +6,13 @@ import { findUser, createUser } from '../data/users';
 
 // 註冊使用者
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;
 
   try {
     // 檢查使用者是否已存在
     const existingUser = await findUser(email);
     if (existingUser) {
-      res.status(400).json({ message: '使用者已存在' });
+      res.status(400).json({ message: 'User already exists' });
       return;
     }
 
@@ -20,7 +20,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 創建新使用者
-    const newUser = await createUser(email, hashedPassword);
+    const newUser = await createUser(username, email, hashedPassword);
     res.status(201).json({ id: newUser.id, email: newUser.email });
   } catch (error) {
     res.status(500).json({ message: '伺服器錯誤', error });
