@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { register, login, getProfile } from '../controllers/Controller'; // 確保路徑正確
+import { register, login, getProfile } from '../controllers/AuthController'; // 確保路徑正確
 import jwt from 'jsonwebtoken';
 
 // 自訂 Request 介面

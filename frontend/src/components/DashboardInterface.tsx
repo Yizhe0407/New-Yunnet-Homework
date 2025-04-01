@@ -48,7 +48,7 @@ export default function DashboardInterface() {
         };
 
         fetchUserData();
-    }, [router]);
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem("token");

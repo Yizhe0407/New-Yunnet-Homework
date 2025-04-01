@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { findUser, findUserById, createUser } from '../data/users';
+import { findUser, findUserById, createUser } from '../data/Users';
 
 interface AuthRequest extends Request {
   userId?: number; // userId 來自 JWT 中間件的解碼

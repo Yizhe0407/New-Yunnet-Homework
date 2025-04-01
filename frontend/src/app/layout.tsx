@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/ThemeProvider"
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Toaster } from 'react-hot-toast';

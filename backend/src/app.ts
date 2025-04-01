@@ -1,6 +1,6 @@
 // src/app.ts
 import express from 'express';
-import userRoutes from './routes/userRoutes';
+import userRoutes from './routes/UserRoutes';
 import dotenv from 'dotenv';
 import cors from "cors";
 

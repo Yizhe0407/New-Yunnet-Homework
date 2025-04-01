@@ -1,3 +1,4 @@
+// src/lib/api.ts
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -11,11 +12,12 @@ const loginSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
     password: z.string().min(6, 'Must be at least 6 characters'),
 });
-type loginSchema = z.infer<typeof loginSchema>;
+type LoginSchema = z.infer<typeof loginSchema>; // 使用 PascalCase
 
 export const api = {
     register: async (data: UserSchema) => {
-        const response = await fetch("http://localhost:4000/api/auth/register", {
+        userSchema.parse(data); // 驗證資料
+        const response = await fetch("api/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -24,8 +26,9 @@ export const api = {
         });
         return response;
     },
-    login: async (data: loginSchema) => {
-        const response = await fetch("http://localhost:4000/api/auth/login", {
+    login: async (data: LoginSchema) => {
+        loginSchema.parse(data); // 驗證資料
+        const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -35,7 +38,7 @@ export const api = {
         return response;
     },
     profile: async (token: string) => {
-        const response = await fetch("http://localhost:4000/api/auth/profile", {
+        const response = await fetch("/api/auth/profile", {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -43,5 +46,5 @@ export const api = {
             },
         });
         return response;
-    }
-}
+    },
+};
