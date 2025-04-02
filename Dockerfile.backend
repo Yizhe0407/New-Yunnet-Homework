@@ -1,0 +1,99 @@
+# --------------------
+# Backend - Builder Stage
+FROM ubuntu:22.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 安裝必要套件、Node.js 與 Yarn（使用 Corepack）
+RUN apt-get update && \
+    apt-get install -y curl gnupg build-essential openssl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+
+# 建立非 root 用戶 appuser 並設定家目錄
+RUN groupadd --system appgroup && \
+    useradd --system --create-home --gid appgroup appuser
+
+# 設定工作目錄（放在 appuser 的家目錄內）
+WORKDIR /home/appuser/app
+
+# 建立工作目錄並調整權限
+RUN mkdir -p /home/appuser/app && chown -R appuser:appgroup /home/appuser/app
+
+# 將 Yarn 快取目錄設定在工作目錄內
+ENV YARN_CACHE_FOLDER=/home/appuser/app/.yarn
+
+# 切換到 appuser 用戶
+USER appuser
+
+# 複製後端 package.json、yarn.lock 及 Yarn PnP 相關檔案
+COPY --chown=appuser:appgroup backend/package.json backend/yarn.lock ./
+COPY --chown=appuser:appgroup backend/.yarn ./.yarn/
+COPY --chown=appuser:appgroup backend/.pnp.cjs backend/.pnp.loader.mjs ./
+
+# 安裝依賴（Plug'n'Play 模式）
+RUN yarn install --immutable
+
+# 安裝 Prisma CLI 與客戶端
+RUN yarn add prisma @prisma/client
+
+# 複製後端所有檔案
+COPY --chown=appuser:appgroup backend/ ./
+
+# 加入 @yarnpkg/pnpify 作為開發依賴
+RUN yarn add -D @yarnpkg/pnpify
+
+# 生成 Prisma 客戶端（僅在建構階段生成）
+RUN yarn pnpify prisma generate
+
+# 清理 Yarn 快取
+RUN yarn cache clean
+
+# --------------------
+# Backend - Runner Stage
+FROM ubuntu:22.04 AS runner
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 安裝必要套件、Node.js 與 Yarn 以及 netcat（用於等待 MySQL）
+RUN apt-get update && \
+    apt-get install -y curl gnupg build-essential openssl netcat && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+
+# 設定 NODE_ENV 為 production
+ENV NODE_ENV=production
+
+# 重新設定 Yarn 快取目錄
+ENV YARN_CACHE_FOLDER=/home/appuser/app/.yarn
+
+# 建立非 root 用戶 appuser（與 builder 階段一致）
+RUN groupadd --system appgroup && \
+    useradd --system --create-home --gid appgroup appuser
+
+# 設定工作目錄
+WORKDIR /home/appuser/app
+
+# 從 builder 階段複製整個工作目錄（包含 .yarn 與 .pnp 檔案）
+COPY --from=builder /home/appuser/app/ ./
+
+# 調整權限
+RUN chown -R appuser:appgroup /home/appuser/app
+
+# 切換到 appuser 用戶
+USER appuser
+
+# 新增步驟：檢查快取並更新 .pnp.cjs
+RUN yarn install --immutable --check-cache
+
+# 暴露應用程式埠（依需求調整）
+EXPOSE 3000
+
+# 運行時：等待 MySQL 就緒後執行資料庫遷移，再啟動應用
+CMD ["sh", "-c", "until nc -z mysql 3306; do echo '等待 MySQL 啟動中...'; sleep 2; done; yarn prisma migrate deploy && yarn ts-node --experimental-specifier-resolution=node src/app.ts"]
