@@ -1,0 +1,82 @@
+# --------------------
+# Frontend - Build Stage
+FROM ubuntu:22.04 AS base
+
+# 安裝必要套件、Node.js 與 Yarn（使用 Corepack）
+RUN apt-get update && \
+    apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN corepack enable && corepack prepare yarn@4.8.1 --activate
+
+# 建立非 root 用戶 nextjs 並設定家目錄
+RUN groupadd --system nextjs && \
+    useradd --system --create-home --gid nextjs nextjs
+
+# 設定工作目錄（在 nextjs 的家目錄內）
+WORKDIR /home/nextjs/app
+
+# 建立工作目錄並調整權限
+RUN mkdir -p /home/nextjs/app && chown -R nextjs:nextjs /home/nextjs/app
+
+# 強制 Yarn 快取目錄設定在工作目錄內
+ENV YARN_CACHE_FOLDER=/home/nextjs/app/.yarn
+
+# 切換到 nextjs 用戶
+USER nextjs
+
+# 複製前端 package.json 與 yarn.lock
+COPY --chown=nextjs:nextjs frontend/package.json frontend/yarn.lock ./
+
+# 安裝依賴（PnP 模式）
+RUN yarn install --immutable
+
+# 複製前端所有檔案
+COPY --chown=nextjs:nextjs frontend/ ./
+
+# 解除封裝 Next.js（如果需要）
+RUN yarn unplug next
+
+# 構建 Next.js 應用程式
+RUN yarn build
+
+# --------------------
+# Frontend - Runner Stage
+FROM ubuntu:22.04 AS runner
+
+# 安裝必要套件、Node.js 與 Yarn
+RUN apt-get update && \
+    apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN corepack enable && corepack prepare yarn@4.8.1 --activate
+
+# 建立非 root 用戶 nextjs（與 build 階段一致）
+RUN groupadd --system nextjs && \
+    useradd --system --create-home --gid nextjs nextjs
+
+# 設定工作目錄
+WORKDIR /home/nextjs/app
+
+# 重新設定 Yarn 快取目錄
+ENV YARN_CACHE_FOLDER=/home/nextjs/app/.yarn
+
+# 複製整個 build 階段的目錄（包含 .yarn 與 .pnp 檔案）
+COPY --from=base /home/nextjs/app/ ./
+
+# 確保權限正確
+RUN chown -R nextjs:nextjs /home/nextjs/app
+
+# 切換到 nextjs 用戶
+USER nextjs
+
+# 新增步驟：檢查快取與重新校正 .pnp.cjs
+RUN yarn install --immutable --check-cache
+
+# 暴露應用程式埠
+EXPOSE 3000
+
+# 啟動應用程式
+CMD ["yarn", "start"]
