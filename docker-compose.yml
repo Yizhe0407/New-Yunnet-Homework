@@ -1,38 +1,35 @@
 services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./frontend
+      dockerfile: ./Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - API_URL=${API_URL}
+      BACKEND_API: http://backend:4000
     depends_on:
       - backend
 
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: ./Dockerfile
     ports:
-      - "4001:4000"
+      - "4000:4000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - PORT=${NODE_PORT}
-      - JWT_SECRET=${JWT_SECRET}
+      DATABASE_URL: mysql://root:admin@mysql:3306/yunnet_db
+      PORT: 4000
+      JWT_SECRET: 8f1d2a9b3c4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0
     depends_on:
       - mysql
+    command: sh -c "until nc -z mysql 3306; do echo 'Waiting for MySQL...'; sleep 1; done && yarn db:dev && yarn start"
 
   mysql:
     image: mysql:latest
     restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: yunnet_db
     ports:
       - "3306:3306"
     volumes:

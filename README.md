@@ -78,3 +78,11 @@ docker rm -f mysql_container
 docker rm -f backend_container
 docker rm -f frontend_container
 ```
+
+## How to remove images
+
+```bash
+docker rmi -f mysql_container
+docker rmi -f backend_container
+docker rmi -f frontend_container
+```
